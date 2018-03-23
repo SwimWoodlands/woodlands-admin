@@ -3,13 +3,14 @@ var csrf = new Tokens()
 var ClientOAuth2 = require('client-oauth2')
 var request = require('request')
 var config = require('../config.json')
+var secrets = require('../secrets.json')
 
 var Tools = function () {
   var tools = this;
 
   var authConfig = {
-    clientId: config.clientId,
-    clientSecret: config.clientSecret,
+    clientId: secrets.clientId,
+    clientSecret: secrets.clientSecret,
     redirectUri: config.redirectUri
   }
 
