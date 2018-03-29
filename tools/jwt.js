@@ -2,7 +2,7 @@ var atob = require('atob')
 var expect = require('expect')
 var request = require('request')
 var tools = require('./tools')
-var config = require('../config.json')
+var config = require('../config.js')
 
 var JWT = function () {
   var jwt = this;

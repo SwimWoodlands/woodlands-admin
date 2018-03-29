@@ -14,15 +14,19 @@
     "btoa": "^1.1.2",
     "client-oauth2": "^3.2.0",
     "csrf": "^3.0.4",
+    "csv-parse": "^2.1.0",
     "ejs": "^2.5.2",
     "expect": "^1.20.2",
     "express": "^4.14.0",
     "express-session": "^1.14.2",
+    "extract-values": "^0.1.2",
+    "firebase-admin": "^5.11.0",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^7.1.9",
     "path": "^0.12.7",
     "request": "^2.78.0",
-    "rsa-pem-from-mod-exp": "^0.8.4"
+    "rsa-pem-from-mod-exp": "^0.8.4",
+    "sha1": "^1.1.1"
   }
 }

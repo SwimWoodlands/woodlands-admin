@@ -2,8 +2,8 @@ var Tokens = require('csrf')
 var csrf = new Tokens()
 var ClientOAuth2 = require('client-oauth2')
 var request = require('request')
-var config = require('../config.json')
-var secrets = require('../secrets.json')
+var config = require('../config.js')
+var secrets = require('../secrets.js')
 
 var Tools = function () {
   var tools = this;
@@ -136,8 +136,10 @@ var Tools = function () {
 
   // Get the token object from session storage
   this.getToken = function(session) {
-    if(!session.accessToken) return null
-
+    if(!session.accessToken) {
+      console.log('tool.getToken(session): no accessToken')
+      return null
+    } 
     return tools.intuitAuth.createToken(
       session.accessToken, session.refreshToken,
       session.tokenType, session.data

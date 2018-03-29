@@ -4,50 +4,53 @@ var request = require('request')
 var express = require('express')
 var router = express.Router()
 
-/** /api_call **/
-router.get('/', function (req, res) {
-  var token = tools.getToken(req.session)
-  if(!token) return res.json({error: 'Not authorized'});
-  if(!req.session.realmId) return res.json({
-    error: 'No realm ID.  QBO calls only work if the accounting scope was passed!'
-  });
+/** /query api_call **/
+router.get('/query/customer', function (req, res) {
+  getQueryAPIHandler("select * from customer where DisplayName like '%"+ req.query.name+"%'", req, res)
+})
 
-  // Set up API call (with OAuth2 accessToken)
-  //var url = config.api_uri + req.session.realmId + '/companyinfo/' + req.session.realmId
-  //var url = config.api_uri + req.session.realmId + '/query?query=select%20%2a%20from%20Customer'
-  var url = config.api_uri + req.session.realmId + '/query?query=Select%20Id%2c%20Name%2c%20UnitPrice%2c%20Description%20from%20Item'
+router.get('/query/invoice', function (req, res) {
+  getQueryAPIHandler("select * from Invoice where CustomerRef = '"+req.query.id+"' and MetaData.CreateTime > '"
+    +config.season+"-01-01' and MetaData.CreateTime < '"+(config.season+1)+"-01-01'", req, res)
+})
 
-/*
-https://sandbox-quickbooks.api.intuit.com/v3/company/123145968128744/query?query=select%20%2a%20from%20Customer&minorversion=4
-https://sandbox-quickbooks.api.intuit.com/v3/company/123145968128744/query?query=select%20%2a%20from%20CompanyInfo&minorversion=4
-https://sandbox-quickbooks.api.intuit.com/v3/company/123145968128744/companyinfo/123145968128744?minorversion=4
-/query?query=Select%20Id%2c%20Name%2c%20UnitPrice%2c%20Description%20from%20Item
-*/
+//router.get('/', getQueryAPIHandler("select * from customer where DisplayName like '%"+ req.query.name+"%'"))
 
-  console.log('Making API call to: ' + url)
-  var requestObj = {
-    url: url,
-    headers: {
-      'Authorization': 'Bearer ' + token.accessToken,
-      'Accept': 'application/json'
-    }
-  }
 
-  // Make API call
-  request(requestObj, function (err, response) {
-    // Check if 401 response was returned - refresh tokens if so!
-    tools.checkForUnauthorized(req, requestObj, err, response).then(function ({err, response}) {
-      if(err || response.statusCode != 200) {
-        return res.json({error: err, statusCode: response.statusCode})
+function getQueryAPIHandler(queryStr, req, res) {
+    var token = tools.getToken(req.session)
+    if(!token) return res.json({error: 'Not authorized'});
+    if(!req.session.realmId) return res.json({
+      error: 'No realm ID.  QBO calls only work if the accounting scope was passed!'
+    });
+
+    var requestObj = {
+      url: config.api_uri + req.session.realmId + '/query?query=' + encodeURIComponent(queryStr),
+      headers: {
+        'Authorization': 'Bearer ' + token.accessToken,
+        'Accept': 'application/json'
       }
-
-      // API Call was a success!
-      res.json(JSON.parse(response.body))
-    }, function (err) {
-      console.log(err)
-      return res.json(err)
+    }
+  
+    // Make API call
+    request(requestObj, function (err, response) {
+      // Check if 401 response was returned - refresh tokens if so!
+      tools.checkForUnauthorized(req, requestObj, err, response).then(function ({err, response}) {
+        if(err || response.statusCode != 200) {
+          return res.json({error: err, statusCode: response.statusCode})
+        }
+  
+        // API Call was a success!
+        res.json(JSON.parse(response.body))
+      }, function (err) {
+        console.log(err)
+        return res.json(err)
+      })
     })
-  })
+}
+
+router.post('/customer', function(req,res){
+
 })
 
 /** /api_call/revoke **/

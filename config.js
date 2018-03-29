@@ -1,5 +1,5 @@
-{
-  "redirectUri": "http://localhost:3000/callback",
+var config = {
+  "redirectUri": process.env.QB_REDIRECT_URI || "http://localhost:3000/callback",
   "configurationEndpoint": "https://developer.api.intuit.com/.well-known/openid_sandbox_configuration/",
   "api_uri": "https://sandbox-quickbooks.api.intuit.com/v3/company/",
   "scopes": {
@@ -21,5 +21,9 @@
       "phone",
       "address"
     ]
-  }
+  },
+  "season": 2018,
+  "testrun": true
 }
+
+module.exports = config

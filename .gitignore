@@ -1,3 +1,7 @@
+# Env files
+prod.env.sh
+dev.env.sh
+
 # Logs
 logs
 *.log

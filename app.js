@@ -1,7 +1,9 @@
 var path = require('path')
-var config = require('./config.json')
+var config = require('./config.js')
 var express = require('express')
 var session = require('express-session')
+var fs = require('fs')
+var https = require('https')
 var app = express()
 
 app.set('views', path.join(__dirname, 'views'))
@@ -27,10 +29,32 @@ app.use('/callback', require('./routes/callback.js'))
 app.use('/connected', require('./routes/connected.js'))
 
 // Call an example API over OAuth2
-app.use('/api_call', require('./routes/api_call.js'))
+app.use('/api', require('./routes/admin_api.js'))
 
 
 // Start server on HTTP (will use ngrok for HTTPS forwarding)
+
+/*
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!')
 })
+*/
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000,
+    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || 'localhost'
+
+app.listen(port, ip, function () {
+  console.log('Server running on http://%s:%s', ip, port)
+})
+/*
+
+var options = {
+  key: fs.readFileSync('./server.key'),
+  cert: fs.readFileSync('./server.crt'),
+  requestCert: false,
+  rejectUnauthorized: false
+};
+
+var server = https.createServer(options, app).listen(443, function(){
+  console.log("server started at port 443");
+});
+*/
