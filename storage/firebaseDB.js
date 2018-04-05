@@ -5,6 +5,7 @@ var config = require('../config.js');
 var FirebaseDB = function() {
     var firebaseDB = this;
 
+    console.log('Firebase apiKey: ' + secrets.apiKey)
     firebase.initializeApp({
         apiKey: secrets.apiKey,
         authDomain: "woodlands-api.firebaseapp.com",
@@ -14,6 +15,7 @@ var FirebaseDB = function() {
         messagingSenderId: secrets.messagingSenderId
       });
     
+    console.log('Initializing Firebase')
     var wstRegDB = firebase.firestore().collection('wst-membership-'+config.season);
     
     this.createWSTRegistration = function(regData) {
