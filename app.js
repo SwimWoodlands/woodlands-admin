@@ -42,6 +42,7 @@ app.listen(3000, function () {
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || 'localhost'
 
+console.log(process.env)
 app.listen(port, ip, function () {
   console.log('Server running on http://%s:%s', ip, port)
 })
