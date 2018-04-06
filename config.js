@@ -1,7 +1,7 @@
 var config = {
   "redirectUri": process.env.QB_REDIRECT_URI || "http://localhost:3000/callback",
   "configurationEndpoint": "https://developer.api.intuit.com/.well-known/openid_sandbox_configuration/",
-  "api_uri": "https://sandbox-quickbooks.api.intuit.com/v3/company/",
+  "api_uri": process.env.QB_API_URI || "https://sandbox-quickbooks.api.intuit.com/v3/company/",
   "scopes": {
     "sign_in_with_intuit": [
       "openid",

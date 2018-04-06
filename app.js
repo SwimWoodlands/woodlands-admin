@@ -42,10 +42,10 @@ app.listen(3000, function () {
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || 'localhost'
 
-console.log('Admin Server Environment variables:')
-console.log(process.env)
 app.listen(port, ip, function () {
-  console.log('Woodlands Admin Server running on http://%s:%s', ip, port)
+  console.log('Woodlands Admin Server \n' +
+      '    running on http://%s:%s\n' +
+      '    callback URI: ' + process.env.QB_REDIRECT_URI, ip, port)
 })
 /*
 
