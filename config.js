@@ -23,7 +23,8 @@ var config = {
     ]
   },
   "season": 2018,
-  "testrun": true
+  "testrun": false,
+  "maxInvoicesPerRun": 3
 }
 
 module.exports = config

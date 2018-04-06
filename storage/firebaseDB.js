@@ -53,8 +53,8 @@ var FirebaseDB = function() {
         if(config.testrun) {
             return Promise.resolve({registration: wstReg, type: 'WST', qbInvoice: qbInvoice})
         } else {
-            wstRegDB.doc(wstRegDoc.id).set({invoiced: true, qbInvoiceId: qbInvoice.Id}, {merge: true})
-            .then(_ => {
+            return wstRegDB.doc(wstReg.RegistrationNumber).set({invoiced: true, qbInvoiceId: qbInvoice.Id}, {merge: true})
+            .then(r => {
                 return {registration: wstReg, type: 'WST', qbInvoice: qbInvoice}
             })
         }
@@ -62,7 +62,7 @@ var FirebaseDB = function() {
 
      this.getUnInvoicedWSTRegistrations = function() {
         return new Promise(function(resolve,reject){
-            wstRegDB.where('invoiced', '==', false).limit(1).get()
+            wstRegDB.where('invoiced', '==', false).limit(config.maxInvoicesPerRun).get()
             .then(snapshot => {
                 docs = []
                 snapshot.forEach(doc => docs.push(doc.data()))

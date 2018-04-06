@@ -1,3 +1,46 @@
-var res = '{"Customer":{"Taxable":true,"BillAddr":{"Id":"98","Line1":"794 Windchime Court","City":"Walnut Creek","Country":"USA","CountrySubDivisionCode":"CA","PostalCode":"94598"},"Job":false,"BillWithParent":false,"Balance":0,"BalanceWithJobs":0,"CurrencyRef":{"value":"USD","name":"United States Dollar"},"PreferredDeliveryMethod":"Print","domain":"QBO","sparse":false,"Id":"61","SyncToken":"20","MetaData":{"CreateTime":"2018-04-02T01:26:54-07:00","LastUpdatedTime":"2018-04-03T02:09:18-07:00"},"GivenName":"Mike & Phyllis Mansell","FamilyName":"Mansell","FullyQualifiedName":"Mike & Phyllis Mansell","DisplayName":"Mike & Phyllis Mansell","PrintOnCheckName":"Mike & Phyllis Mansell","Active":true,"PrimaryPhone":{"FreeFormNumber":"9252627830"},"PrimaryEmailAddr":{"Address":"mike@mansellfamily.ca"},"DefaultTaxCodeRef":{"value":"2"}},"time":"2018-04-03T02:09:18.316-07:00"}'
+/*
+console.log(/^([a-z0-9]{5,})$/.test('abc1'))
 
-console.log(JSON.parse(res).Customer)
+console.log(/^([a-z0-9]{5,})$/.test('abc12'))
+
+console.log(/^([a-z0-9]{5,})$/.test('abc123'))
+
+
+console.log(/(^|\s)Ho($|\s|\,)/.test('Ho, '))
+*/
+
+
+//console.log(/[^a-zA-Z0-9|$]Ho[^a-zA-Z0-9]/.test('Ho, Peter'))
+
+//console.log(/(^|\s|[^a-zA-Z0-9])Ho($|\s|\,)/.test(':Ho'))
+//console.log(/(^|[^a-zA-Z0-9])Ho($|[^a-zA-Z0-9])/.test(';Hoe,'))
+
+//var regex = new RegExp('(^|[^a-zA-Z0-9])' + 'Ho' + '($|[^a-zA-Z0-9])')
+/*
+console.log('test: ' + containsName('John Hock : Bob & Sue','Ho'))
+console.log('test: ' + containsName('HO','Ho'))
+console.log('test: ' + containsName('HO, Peter','Ho'))
+*/
+
+var existing = {DisplayName: ' Ho  Betty & Charles:Peter,:'}
+var parent = {firstName: 'Peter', lastName: 'Ho'}
+
+if(containsName(existing.DisplayName, parent.firstName) 
+&& containsName(existing.DisplayName, parent.lastName)) {
+    console.log('Customer matched on name: ' + parent.firstName + ' ' + parent.lastName)
+} else {
+    console.log('No customer match')
+}
+
+var set1 = new Set()
+set1.add('mansell').add('martin').add('mansell').add('mansell')
+console.log(set1)
+
+
+function nameRegEx(name) {
+    return new RegExp('(^|[^a-zA-Z0-9])' + name + '($|[^a-zA-Z0-9])','i')
+}
+
+function containsName(str, name) {
+    return nameRegEx(name).test(str)
+}

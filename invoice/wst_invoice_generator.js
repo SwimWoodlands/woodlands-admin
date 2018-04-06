@@ -13,11 +13,11 @@ var InvoiceGenerator = function() {
                 "CountrySubDivisionCode": wstReg.AddressState,
                 "PostalCode": wstReg.AddressZipCode
             },
-            "GivenName": parentNames,
+            "GivenName": parentNames.givenNames,
             "FamilyName": wstReg.FamilyName,
-            "FullyQualifiedName": parentNames,
-            "DisplayName": parentNames,
-            "PrintOnCheckName": parentNames,
+            "FullyQualifiedName": parentNames.allNames,
+            "DisplayName": parentNames.allNames,
+            "PrintOnCheckName": parentNames.allNames,
             "PrimaryPhone": {
                 "FreeFormNumber": wstReg.HomePhone
             },
@@ -202,7 +202,7 @@ var InvoiceGenerator = function() {
                 parentNames = parentNames + ' and ' + value + ' ' + key
             }
         });
-        return parentNames
+        return {allNames: parentNames, givenNames: pMap.get(wstReg.FamilyName)}
     }
     
 }

@@ -22,6 +22,32 @@ var QBO = function () {
             })
     }
     
+    this.findCustomerCandidates = function(customer) {
+        var pending = []
+        var parentLastNames = new Set()
+        customer.qbCustomer.parents.forEach(parent => parentLastNames.add(parent.lastName))
+        parentLastNames.forEach(lastName => {
+            pending.push(qbo.queryAPI("select * from customer where DisplayName like '%"+lastName+"%'"))
+        })
+        return Promise.all(pending).then(results => {
+            var candidates = []
+            results.forEach(result => {
+                
+            })
+        })
+    }
+
+/*
+
+var set1 = new Set()
+set1 = set1.add('mansell').add('martin').add('mansell').add('mansell')
+console.log(set1)
+
+Promise.all([promise1, promise2, promise3]).then(function(values) {
+  console.log(values);
+});
+*/
+
     this.upsertCustomer = function(customer) {
         return qbo.queryAPI("select * from customer where DisplayName like '%"+customer.qbCustomer.FamilyName+"%'")
         .then(result => matchCustomers(customer, result))
@@ -41,7 +67,9 @@ var QBO = function () {
         var result = {isNewCustomer: true}
         if('Customer' in res.QueryResponse) {
             var customers = res.QueryResponse.Customer
-            for (i = 0; i < customers.length; i++) { 
+            console.log('Potential matches: ' + customers.length)
+            for (var i = 0; i < customers.length; i++) { 
+                console.log('processing customer number: ' + i)
                 custMatch = matchCustomer(customer, customers[i])
                 if(custMatch.isMatch) {
                     result.isNewCustomer = false
@@ -52,7 +80,10 @@ var QBO = function () {
                         result.hasUpdates = false
                         result.matchedCustomer = customers[i]
                     }
+                    console.log('Match Found for DisplayName: ' + customers[i].DisplayName)
                     break;
+                } else {
+                    console.log('No match for DisplayName: ' + customers[i].DisplayName)
                 }
             }
         }
@@ -65,30 +96,50 @@ var QBO = function () {
         var newParents = customer.metaData.parents
         var result = {isMatch: false, hasUpdates: true, update: existing}
 
-        for (i = 0; i < newParents.length; i++) {
-            var parent = newParents[i]
-            if(parent.email == existing.PrimaryEmailAddr.Address) {
+        if('PrimaryEmailAddr' in existing && 'Address' in existing.PrimaryEmailAddr) {
+            console.log('testing email match')
+            for (i = 0; i < newParents.length; i++) {
+                var parent = newParents[i]
+                if(parent.email == existing.PrimaryEmailAddr.Address) {
+                    result.isMatch = true
+                    console.log('Customer matched on email: ' + parent.email)
+                    mergeCustomer(newRecord, result.update)
+                    return result
+                }
+            }
+        } else {
+            console.log('Skipping email test as QB Customer has no primary email info')
+        }
+
+        if('PrimaryPhone' in existing && 'FreeFormNumber' in existing.PrimaryPhone) {
+            console.log('testing primary phone match')
+            if(newRecord.PrimaryPhone.FreeFormNumber == existing.PrimaryPhone.FreeFormNumber) {
                 result.isMatch = true
-                console.log('Customer matched on email: ' + parent.email)
+                console.log('Customer matched on Phone Number: ' + newRecord.PrimaryPhone.FreeFormNumber)
                 mergeCustomer(newRecord, result.update)
                 return result
             }
+        } else {
+            console.log('Skipping primary phone test as QB Customer has no info')
         }
-        if(newRecord.PrimaryPhone.FreeFormNumber == existing.PrimaryPhone.FreeFormNumber) {
-            result.isMatch = true
-            console.log('Customer matched on Phone Number: ' + newRecord.PrimaryPhone.FreeFormNumber)
-            mergeCustomer(newRecord, result.update)
-            return result
+
+        if('BillAddr' in existing && 'Line1' in existing.BillAddr) {
+            console.log('testing billing address match')
+            if(newRecord.BillAddr.Line1 == existing.BillAddr.Line1) {
+                result.isMatch = true
+                console.log('Customer matched on Address: ' + newRecord.BillAddr.Line1)
+                mergeCustomer(newRecord, result.update)
+                return result
+            }
+        } else {
+            console.log('Skipping Billing Address match')
         }
-        if(newRecord.BillAddr.Line1 == existing.BillAddr.Line1) {
-            result.isMatch = true
-            console.log('Customer matched on Address: ' + newRecord.BillAddr.Line1)
-            mergeCustomer(newRecord, result.update)
-            return result
-        }
+
+        console.log('test parent first and last name matches in DisplayName')
         for (i = 0; i < newParents.length; i++) {
             var parent = newParents[i]
-            if(existing.DisplayName.includes(parent.firstName)) {
+            if(containsName(existing.DisplayName, parent.firstName) 
+                && containsName(existing.DisplayName, parent.lastName)) {
                 result.isMatch = true
                 console.log('Customer matched on name: ' + parent.firstName + ' ' + parent.lastName)
                 mergeCustomer(newRecord, result.update)
@@ -98,6 +149,14 @@ var QBO = function () {
         return result
     }
 
+    function nameRegEx(name) {
+        return new RegExp('(^|[^a-zA-Z0-9])' + name + '($|[^a-zA-Z0-9])','i')
+    }
+    
+    function containsName(str, name) {
+        return nameRegEx(name).test(str)
+    }
+    
     function mergeCustomer(newCustomer, existing) {
         for (var attrname in newCustomer) { existing[attrname] = newCustomer[attrname] }
     }
