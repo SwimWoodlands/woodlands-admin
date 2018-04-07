@@ -22,7 +22,7 @@ var InvoiceGenerator = function() {
                 "FreeFormNumber": wstReg.HomePhone
             },
             "PrimaryEmailAddr": {
-                "Address": wstReg.parents[0].email
+                "Address": getParentEmail(wstReg.parents)
             }
         }
         if(wstReg.AddressLine2.trim() != '') {
@@ -31,13 +31,30 @@ var InvoiceGenerator = function() {
         return { qbCustomer: customerObj, metaData: {parents: wstReg.parents}}
     }
 
+    function getParentEmail(parents) {
+        console.log(parents)
+        var email = 'notanemail'
+        for(var i=0; i< parents.length; i++) {
+            console.log('Evaluating email: ' + parents[i].email)
+            if(parents[i].email == 'none') {
+                console.log('Ignoring empty email for parent: ' + parents[i].firstName)
+            } else {
+                console.log('Using email('+ parents[i].email + ')')
+                email = parents[i].email
+                break
+            }
+        }
+        console.log('found email: ' + email)
+        return email
+    }
+
     this.buildWSTRegistrationInvoice = function(wstReg, customerRef) {
         var invoice = {
             AllowOnlineCreditCardPayment: true,
             AllowOnlineACHPayment: true,
             Line: [], 
             BillEmail: {
-                Address: wstReg.parents[0].email
+                Address: getParentEmail(wstReg.parents)
             },
             CustomerMemo: {
                 value: "Hello - your invoice for Woodlands Swim Team " + config.season + " registration is ready.\nThanks!"

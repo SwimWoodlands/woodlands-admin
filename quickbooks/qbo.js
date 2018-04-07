@@ -23,33 +23,28 @@ var QBO = function () {
     }
     
     this.findCustomerCandidates = function(customer) {
+        console.log('inside findCustomerCandidates')
         var pending = []
         var parentLastNames = new Set()
-        customer.qbCustomer.parents.forEach(parent => parentLastNames.add(parent.lastName))
+        customer.metaData.parents.forEach(parent => parentLastNames.add(parent.lastName))
+        console.log('Finding Customer Candidates for:')
+        console.log(parentLastNames)
         parentLastNames.forEach(lastName => {
-            pending.push(qbo.queryAPI("select * from customer where DisplayName like '%"+lastName+"%'"))
+            pending.push(qbo.queryAPI("select * from customer where DisplayName like '%"+lastName.replace(/\'/g,'\\\'')+"%'"))
         })
         return Promise.all(pending).then(results => {
             var candidates = []
             results.forEach(result => {
-                
+                if('Customer' in result.QueryResponse) {
+                    result.QueryResponse.Customer.forEach(cust => candidates.push(cust))
+                }
             })
+            return candidates
         })
     }
 
-/*
-
-var set1 = new Set()
-set1 = set1.add('mansell').add('martin').add('mansell').add('mansell')
-console.log(set1)
-
-Promise.all([promise1, promise2, promise3]).then(function(values) {
-  console.log(values);
-});
-*/
-
     this.upsertCustomer = function(customer) {
-        return qbo.queryAPI("select * from customer where DisplayName like '%"+customer.qbCustomer.FamilyName+"%'")
+        return this.findCustomerCandidates(customer)
         .then(result => matchCustomers(customer, result))
         .then(matchResult => {
             if(matchResult.isNewCustomer){
@@ -62,29 +57,25 @@ Promise.all([promise1, promise2, promise3]).then(function(values) {
         })
     }
 
-    function matchCustomers(customer, res) {
+    function matchCustomers(customer, potentialQBMatches) {
         console.log('inside matchCustomers')
         var result = {isNewCustomer: true}
-        if('Customer' in res.QueryResponse) {
-            var customers = res.QueryResponse.Customer
-            console.log('Potential matches: ' + customers.length)
-            for (var i = 0; i < customers.length; i++) { 
-                console.log('processing customer number: ' + i)
-                custMatch = matchCustomer(customer, customers[i])
-                if(custMatch.isMatch) {
-                    result.isNewCustomer = false
-                    if(custMatch.hasUpdates){
-                        result.hasUpdates = true
-                        result.updatedCustomer = custMatch.update
-                    } else {
-                        result.hasUpdates = false
-                        result.matchedCustomer = customers[i]
-                    }
-                    console.log('Match Found for DisplayName: ' + customers[i].DisplayName)
-                    break;
+        for (var i = 0; i < potentialQBMatches.length; i++) { 
+            console.log('processing customer number: ' + i)
+            custMatch = matchCustomer(customer, potentialQBMatches[i])
+            if(custMatch.isMatch) {
+                result.isNewCustomer = false
+                if(custMatch.hasUpdates){
+                    result.hasUpdates = true
+                    result.updatedCustomer = custMatch.update
                 } else {
-                    console.log('No match for DisplayName: ' + customers[i].DisplayName)
+                    result.hasUpdates = false
+                    result.matchedCustomer = customers[i]
                 }
+                console.log('Match Found for DisplayName: ' + potentialQBMatches[i].DisplayName)
+                break;
+            } else {
+                console.log('No match for DisplayName: ' + potentialQBMatches[i].DisplayName)
             }
         }
         return result
@@ -228,7 +219,7 @@ Promise.all([promise1, promise2, promise3]).then(function(values) {
                 reject(new Error({error: err, statusCode: response.statusCode}))
               }
               var resp = JSON.parse(body)
-              console.log(resp)
+              console.log(JSON.stringify(resp))
               resolve(resp)
             })
         })

@@ -44,3 +44,7 @@ function nameRegEx(name) {
 function containsName(str, name) {
     return nameRegEx(name).test(str)
 }
+
+console.log('------------------')
+console.log('O\'Donnel'.replace(/\'/g,'\\\''))
+console.log('Mansell'.replace(/\'/g,'\\\''))
